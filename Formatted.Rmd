@@ -1,0 +1,258 @@
+
+
+
+```{r}
+library(gapminder)
+library(ggplot2)
+library(dplyr)
+library(GGally)
+data <- gapminder
+```
+### Looking at trend: relation between lifeExp and gdpPercap
+```{r}
+ggplot(data,aes(x=gdpPercap,y=lifeExp))+geom_point()
+```
+### Since the trend is concentrated towards right hand side, trying to use log tranformation so check if there is a conventional relation between lifeExp and gdpPercap
+```{r}
+data <- data %>% mutate(log_gdpPercap=log(data$gdpPercap),log_pop=log(data$pop))
+ggplot(data,aes(x=log_gdpPercap,y=lifeExp))+geom_point()
+
+```
+### Looking at the above graph we might be able to establish a linear relation.
+
+
+
+
+# Q3
+
+## Changes in the relationship between GDP and life expectancy over time: 
+
+Graph 1:
+Overall we could say that the relation between log_GDP and life expectancy can mostly be explained by a linear model.
+As we plot the graph over time, we can observe that the overall trend has moved upwards.
+2 things that emerge from this trend:
+  1. overall life expectancy has increased over time. 
+  2. cluster of points in early years was more concentrated at the bottom left corner, and we could could see that cluster           shifting upwards in the right direction, indicating that GDP per ca-pita is increasing over time.
+
+Graph 2:
+As we look at the linear model fitted to the plots, the line slope of the line seems to be decreasing over time, which indicates that increase in the logGDP is more as compared to the increase in life expectancy
+
+```{r fig.height=2, fig.width=24}
+#Graph 1
+ggplot(data,aes(x=log_gdpPercap,y=lifeExp))+
+  geom_point()+
+  facet_grid(~year)
+  #facet_grid(~cut(year, breaks = 10))
+```
+
+
+```{r fig.height=2, fig.width=24}
+#Graph 2
+ggplot(data,aes(x=log_gdpPercap,y=lifeExp))+
+  #geom_point()+
+  stat_smooth(method='lm',se=FALSE)+
+  facet_grid(~year)
+  #facet_grid(~cut(year, breaks = 10))
+```
+
+# How has the relationship between GDP and life expectancy changed in each continent?
+
+Graph 1:
+To find this relation we plotted the relation between relationship between logGDP and life expectancy over time for different continents. The relation follows the trend that we derived for the last question. We could see the trend can be described using a linear relation
+
+Graph 2 and Graph 3:
+These plots shows us that though there is a linear relation between logGDP and life expectancy, and the trend seems to be upward, the slope of linear model is not same across all the continents.
+For Asia the trends seems to been increasing throughout,
+for Africa the trend saw and increase until 1997, after that we can observe that though the GDP has incresed but life expectancy has had a minor dip. In Americas the trend has been ever increasing but is seeing a plateauing out with respect to the Life expectancy. In Europe we could see maximum life expectancy in all the five continents and trend between logGDP and life expectancy still increasing but slope has reduced bit.
+Oceania though has only two countries but those countries has kind of experience a meteoric increase in trend.
+
+For a comparison Erope has consistent has almost a consistent increase in logGDP and LifeExpectancy, and holds highest life expectancy amongst all the continents.
+Americas has had almost perfect linear relation of LifeExpectancy with logGDP between 1952 and 1982 but after the years following the years life expectancy has not proportionally increased with respect to GDPpercap.
+Though for Asia there has always been a  proportional increase in LifeExpectancy with logGDP, after 1982 there has been more countries which are contributing more to the high life expectancy
+
+
+```{r fig.height=2, fig.width=24}
+#Graph 1
+for (con in c('Asia','Africa','Americas','Europe','Oceania')){
+  p <- ggplot(subset(data,continent==con),aes(x=log_gdpPercap,y=lifeExp))+
+  geom_point()+
+  #stat_smooth(method="lm",se=FALSE)+
+  #facet_grid(~cut(year, breaks = 10))+
+  facet_grid(~year)+
+  labs(title = con)
+  print(p)
+}
+```
+
+```{r fig.height=2, fig.width=24}
+#Graph 2
+for (con in c('Asia','Africa','Americas','Europe','Oceania')){
+  p <- ggplot(subset(data,continent==con),aes(x=log_gdpPercap,y=lifeExp))+
+  #geom_point()+
+  stat_smooth(method="lm",se=FALSE)+
+  #facet_grid(~cut(year, breaks = 10))+
+  facet_grid(~year)+
+  labs(title = con)
+  print(p)
+}
+```
+
+
+
+```{r fig.height=2, fig.width=20}
+#Graph 3
+ggplot(data,aes(x=log_gdpPercap,y=lifeExp,color=continent))+
+  #geom_point()+
+  stat_smooth(method="lm",se=FALSE)+
+  #facet_grid(~cut(year, breaks = 10))+
+  facet_grid(~year)
+```
+
+
+
+# Can changes in life expectancy be entirely explained by changes in GDP per capita? 
+
+To explore this we might need to check the relation Life Expectancy has with other variables. 
+To check for the relation we have plotted ggpairs.
+
+```{r}
+
+ggpairs(subset(data,select = -c(country,gdpPercap,log_pop,country)))
+
+```
+Going by the plot there exists a strong relation of log_gdpPercap and lifeExpec. 
+There is not a clear relation that exists between population and LifeExp.
+The relation between life exp and year seems to be an increasing function. Also we would like to confirm if years is explained by GDPperCap or not.
+Continents also seem to have an impact on the lifeExp we would like to explore this relation as well.
+
+
+
+#Checking for the relationship between population and life expectancy
+Though there is not a clear relation that exists between population and LifeExp, but we will try to explore this relation  bit more. 
+
+Graph 1:
+This relation is not very clear, we will try to plot log_pop and lifeExp
+```{r  }
+# Graph 1
+ggplot(data,aes(x=pop,y=lifeExp))+
+  geom_point(aes(color=continent),size=0.5)
+```
+Graph 2 , Graph 3 and Graph 4
+Even with log pop and relation analyzed at the continent level, there seems not be a clear trend between log_pop and lifeExp
+```{r}
+# Graph 2
+ggplot(data,aes(x=log_pop,y=lifeExp))+
+  geom_point(aes(color=continent),size=0.5)
+```
+```{r fig.height=5, fig.width=25 }
+# Graph 3
+ggplot(data,aes(x=log_pop,y=lifeExp))+
+  geom_point()+
+  facet_grid(~continent)
+```
+
+```{r fig.height=2, fig.width=24 }
+# Graph 4
+ggplot(data,aes(x=log_pop,y=lifeExp))+
+  geom_point()+
+  facet_grid(~year)
+```
+
+
+#Checking for the relationship between Year and life expectancy
+
+Graph 1
+With ggpairs and the following plot we could see there is a linear increasing relation between year and lifeExp.
+```{r }
+#Graph 1
+ggplot(data,aes(x=year,y=lifeExp))+
+  geom_point(size = 0.5)
+  #facet_grid(~cut(year, breaks = 10))
+```
+Graph 2
+
+Trying to analyze the relation at the country level with in each continent, seems that the relation is monotonically increasing
+```{r fig.height = 8, fig.width = 14}
+#Graph 2
+for (con in c('Asia','Africa','Americas','Europe','Oceania')){
+  p <- ggplot(subset(data,continent==con),aes(x=year,y=lifeExp,color=country))+
+  geom_point(size = 2,show.legend = FALSE)+labs(title = con)+
+  facet_wrap(~country,ncol=6)
+# +
+ # theme(
+  # strip.placement = "outside",
+  # panel.spacing = unit(.2, "lines"))+
+  #scale_x_continuous(breaks = seq(1950, 2007, by=20)) */
+ 
+  print(p) 
+}
+```
+# relation between log_gdpPercap and year(to avoid another parameter which have exactly same affect as log_gdpPercap)
+#Graph 3
+There are trends with in countries that suggest that there is no definitive pattern that can summarize that year is entirely explained by log_gdpPercap, hence we should avoid year in estimating lifExp.
+
+```{r fig.height = 8, fig.width = 14}
+#Graph 3
+for (con in c('Asia','Africa','Americas','Europe','Oceania')){
+  p <- ggplot(subset(data,continent==con),aes(x=year,y=log_gdpPercap,color=country))+
+  geom_point(size = 2,show.legend = FALSE)+labs(title = con)+
+  facet_wrap(~country,ncol=6)
+# +
+ # theme(
+  # strip.placement = "outside",
+  # panel.spacing = unit(.2, "lines"))+
+  #scale_x_continuous(breaks = seq(1950, 2007, by=20)) */
+ 
+  print(p) 
+}
+```
+
+##Does it look like there’s a time effect on life expectancy in addition to a GDP effect? 
+
+From the plot above, we can conclude that time has an effect on lifeExp along with log_gdpPercap
+Graph 1 and Graph 2
+Also after fitting a linear model only with log_gdpPercap and log_gdpPercap+year we could see the range of residuals is less as compared in the model with log_gdpPercap+year to residuals plotted with the model that has only log_gdpPercap
+
+```{r   }
+#Graph 1
+lm_model <- lm(lifeExp ~ log_gdpPercap+year,data) 
+data_with_resid <- data %>% mutate(residuals=lm_model$resid)
+ggplot(data_with_resid)+
+  geom_point(aes(x=log_gdpPercap,y=residuals),color="blue",size = .5)+ggtitle("Residuals-log_gdpPercap")
+  
+```
+```{r}
+
+data_with_resid <- data %>% mutate(residuals=lm_model$resid)
+ggplot(data_with_resid)+
+  geom_point(aes(x=year,y=residuals),color="blue",size = .5)+ggtitle("Residuals-year")
+  
+```
+
+
+```{r   }
+#Graph 2
+lm_model <- lm(lifeExp ~ log_gdpPercap,data) 
+data_with_resid <- data %>% mutate(residuals=lm_model$resid)
+ggplot(data_with_resid)+
+  geom_point(aes(x=log_gdpPercap,y=residuals),color="blue",size = .5)+ggtitle("Residuals-log_gdpPercap")
+  
+```
+
+### Best results are explained when we inclue continent as well in our linear model
+
+```{r   }
+
+#Graph 1
+lm_model <- lm(lifeExp ~ log_gdpPercap+year+continent,data) 
+data_with_resid <- data %>% mutate(residuals=lm_model$resid)
+ggplot(data_with_resid)+
+  geom_point(aes(x=log_gdpPercap,y=residuals),color="blue",size = .5)+ggtitle("Residuals-log_gdpPercap")
+  
+```
+
+
+
+
+
+

@@ -1,0 +1,263 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(gapminder)
+library(tidyverse)
+library(broom)
+library(ggplot2)
+library(ggrepel)
+```
+
+```{r}
+summary(gapminder)
+```
+
+```{r}
+gap.data <- as.data.frame(gapminder)
+gap.data
+```
+
+```{r}
+gap_2007 <- as.data.frame(subset(gap.data, year == 2007))
+gap_2007
+```
+
+```{r, fig.height = 8, fig.width = 14}
+ggplot(data = gap_2007, aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(aes(color = continent, size = pop / 10^8), alpha = 0.5) +
+  stat_smooth(method = 'lm', formula = y ~ x,  color = "red", size = 0.2, se = FALSE) +
+  stat_smooth(method = 'lm', formula = y ~ x + I(x^2), color = "black", size = 0.2, se = FALSE) +
+  stat_smooth(method = 'loess', formula = y ~ x, method.args = list(degree = 2, span = 0.25), size = 0.2, se = FALSE) +
+  theme_bw()
+```
+
+```{r, fig.height = 4, fig.width = 18}
+ggplot(data = gap_2007, aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(aes(color = continent, size = pop / 10^8), alpha = 0.5) +
+  facet_grid(~continent) +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r, fig.height = 8, fig.width = 12}
+ggplot(data = gap_2007 %>% filter(continent == "Africa"), aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(aes(colour = country, size = pop), alpha = 0.5) +
+  geom_text_repel(size = 3, aes(label = country)) +
+  stat_smooth(method = 'lm', formula = y ~ x,  color = "red", size = 0.2, se = FALSE) +
+  stat_smooth(method = 'lm', formula = y ~ x + I(x^2), color = "black", size = 0.2, se = FALSE) +
+  stat_smooth(method = 'loess', formula = y ~ x, method.args = list(degree = 2, span = 0.25), size = 0.2, colour = "blue", se = FALSE) +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r, fig.height = 8, fig.width = 12}
+ggplot(data = gap_2007 %>% filter(continent == "Asia"), aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(aes(colour = country, size = pop), alpha = 0.5) +
+  geom_text_repel(size = 3, aes(label = country)) +
+  stat_smooth(method = 'lm', formula = y ~ x,  color = "red", size = 0.2, se = FALSE) +
+  stat_smooth(method = 'lm', formula = y ~ x + I(x^2), color = "black", size = 0.2, se = FALSE) +
+  stat_smooth(method = 'loess', formula = y ~ x, method.args = list(degree = 2, span = 0.25), size = 0.2, colour = "blue", se = FALSE) +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r, fig.height = 8, fig.width = 12}
+ggplot(data = gap_2007 %>% filter(continent == "Oceania"), aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(aes(colour = country, size = pop), alpha = 0.5) +
+  geom_text_repel(size = 3, aes(label = country)) +
+  stat_smooth(method = 'lm', formula = y ~ x,  color = "red", size = 0.2, se = FALSE) +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r, fig.height = 8, fig.width = 12}
+ggplot(data = gap_2007 %>% filter(continent == "Americas"), aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(aes(colour = country, size = pop), alpha = 0.5) +
+  geom_text_repel(size = 3, aes(label = country)) +
+  stat_smooth(method = 'lm', formula = y ~ x,  color = "red", size = 0.2, se = FALSE) +
+  stat_smooth(method = 'lm', formula = y ~ x + I(x^2), color = "black", size = 0.2, se = FALSE) +
+  stat_smooth(method = 'loess', formula = y ~ x, method.args = list(degree = 2, span = 0.25), size = 0.2, colour = "blue", se = FALSE) +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r, fig.height = 8, fig.width = 12}
+ggplot(data = gap_2007 %>% filter(continent == "Europe"), aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(aes(colour = country, size = pop), alpha = 0.5) +
+  geom_text_repel(size = 3, aes(label = country)) +
+  stat_smooth(method = 'lm', formula = y ~ x,  color = "red", size = 0.2, se = FALSE) +
+  stat_smooth(method = 'lm', formula = y ~ x + I(x^2), color = "black", size = 0.2, se = FALSE) +
+  stat_smooth(method = 'loess', formula = y ~ x, method.args = list(degree = 2, span = 0.25), size = 0.2, colour = "blue", se = FALSE) +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+options(dplyr.summarise.inform = FALSE)
+
+gap.weighted_year <- 
+  gap.data %>% 
+  group_by(year) %>% 
+  dplyr::summarise(weighted_avg_lifeExp = weighted.mean(lifeExp, pop)) %>%
+  as.data.frame()
+gap.weighted_year
+```
+
+```{r, fig.height = 6, fig.width = 12}
+ggplot(data = gap.data, aes(x = year, y = lifeExp)) +
+  geom_point(aes(color = continent), alpha = 0.5) +
+  stat_summary(aes(y = lifeExp, group = 1), fun = mean, size = 0.2, colour = "red", geom = "line", group = 1) +
+  geom_line(data = gap.weighted_year, aes(x = year, y = weighted_avg_lifeExp), size = 0.2, colour = "black", linetype = 2) +
+  theme_bw()
+```
+
+```{r}
+options(dplyr.summarise.inform = FALSE)
+
+gap.weighted_year_continent <- 
+  gap.data %>% 
+  group_by(continent, year) %>% 
+  dplyr::summarise(weighted_avg_lifeExp = weighted.mean(lifeExp, pop)) %>%
+  as.data.frame()
+gap.weighted_year_continent
+```
+
+```{r, fig.height = 5, fig.width = 18}
+ggplot(data = gap.data, aes(x = year, y = lifeExp)) +
+  geom_point(aes(color = continent), alpha = 0.5) +
+  stat_summary(aes(y = lifeExp, group = 1), fun = mean, size = 0.2, colour = "red", geom = "line", group = 1) +
+  geom_line(data = gap.weighted_year_continent, aes(x = year, y = weighted_avg_lifeExp), size = 0.2, colour = "black", linetype = 2) +
+  facet_wrap(~continent, ncol = 5) +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r, fig.height = 9, fig.width = 18}
+ggplot(data = gap.data %>% filter(continent == "Africa"), aes(x = year, y = lifeExp)) +
+  geom_line(aes(colour = country)) +
+  facet_wrap(~country, ncol = 8) +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r, fig.height = 6, fig.width = 12}
+ggplot(data = gap.data %>% filter(continent == "Americas"), aes(x = year, y = lifeExp)) +
+  geom_line(aes(colour = country)) +
+  facet_wrap(~country, ncol = 5) +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r, fig.height = 8, fig.width = 12}
+ggplot(data = gap.data %>% filter(continent == "Asia"), aes(x = year, y = lifeExp)) +
+  geom_line(aes(colour = country)) +
+  facet_wrap(~country, ncol = 5) +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r, fig.height = 5, fig.width = 12}
+ggplot(data = gap.data %>% filter(continent == "Oceania"), aes(x = year, y = lifeExp)) +
+  geom_line(aes(colour = country)) +
+  facet_wrap(~country, ncol = 2) +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r, fig.height = 6, fig.width = 12}
+ggplot(data = gap.data %>% filter(continent == "Europe"), aes(x = year, y = lifeExp)) +
+  geom_line(aes(colour = country)) +
+  facet_wrap(~country, ncol = 5) +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+years = gap.data$year
+intervals = as.data.frame(co.intervals(years, number = 6, overlap = 0))
+intervals
+```
+
+```{r}
+interval = c()
+for (y in years) {
+  for (i in 1:nrow(intervals)) {
+    lower = intervals[i, 1]
+    upper = intervals[i, 2]
+    if (y > lower & y < upper) {
+      interval <- append(interval, as.factor(sprintf("(%.2f, %.2f)", lower, upper)))
+      break
+    }
+      
+  }
+}
+
+gap.data <- gap.data %>%
+  mutate(intervals = interval)
+gap.data
+```
+
+```{r}
+options(dplyr.summarise.inform = FALSE)
+
+gap.avg_intervals <- 
+  gap.data %>% 
+  group_by(intervals) %>% 
+  dplyr::summarise(avg_lifeExp = mean(lifeExp)) %>%
+  as.data.frame()
+gap.avg_intervals
+```
+
+```{r, fig.height = 3, fig.width = 15}
+ggplot(data = gap.data) +
+  geom_point(aes(x = gdpPercap/1000, y = lifeExp, colour = continent), alpha = 0.6) +
+  facet_grid(~intervals, scales = "free_x") +
+  theme_bw()
+```
+
+```{r, fig.height = 3, fig.width = 15}
+ggplot(data = gap.data %>% filter(continent == "Africa")) +
+  geom_point(aes(x = gdpPercap/10000, y = lifeExp, colour = country), alpha = 0.6) +
+  facet_grid(~intervals, scales = "free_x") +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r, fig.height = 3, fig.width = 15}
+ggplot(data = gap.data %>% filter(continent == "Americas")) +
+  geom_point(aes(x = gdpPercap/1000, y = lifeExp, colour = country), alpha = 0.6) +
+  facet_grid(~intervals) +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r, fig.height = 3, fig.width = 15}
+ggplot(data = gap.data %>% filter(continent == "Asia")) +
+  geom_point(aes(x = gdpPercap/1000, y = lifeExp, colour = country), alpha = 0.6) +
+  facet_grid(~intervals, scales = "free_x") +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r, fig.height = 3, fig.width = 15}
+ggplot(data = gap.data %>% filter(continent == "Europe")) +
+  geom_point(aes(x = gdpPercap/1000, y = lifeExp, colour = country), alpha = 0.6) +
+  facet_grid(~intervals, scales = "free_x") +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+```{r, fig.height = 3, fig.width = 15}
+ggplot(data = gap.data %>% filter(continent == "Oceania")) +
+  geom_point(aes(x = gdpPercap/1000, y = lifeExp, colour = country), alpha = 0.6) +
+  facet_grid(~intervals, scales = "free_x") +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
+
+
+
+
